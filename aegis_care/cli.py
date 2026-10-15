@@ -435,9 +435,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--families", nargs="+", default=list(FAMILIES), choices=list(FAMILIES))
     p.add_argument("--depths", nargs="+", type=int, default=[2, 3, 4])
     p.add_argument("--provenance", nargs="+",
-                   default=["complete", "random40", "targeted"],
+                   default=["complete", "random20", "random40", "random60", "targeted"],
                    choices=list(ProvenanceMask.CONDITIONS))
-    p.add_argument("--tasks-per-family", type=int, default=1)
+    p.add_argument("--tasks-per-family", type=int, default=2)
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_experiment)
 

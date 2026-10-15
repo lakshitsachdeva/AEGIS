@@ -27,7 +27,7 @@ LIMITATIONS = [
     "The deterministic clinical composer validates recovery mechanics, not open-ended LLM behaviour.",
     "The external run validates FHIR R4 shape and source independence, not hospital workflow integration.",
     "Family F3 adds a deterministic restricted-field incident overlay because Synthea does not encode the study's local role policy.",
-    "Thresholds remain those frozen in the proposal; this run is not a prospective clinical study.",
+    "Thresholds are fixed implementation defaults; the original pilot-selection record is unavailable, and this is not a prospective clinical study.",
 ]
 
 
@@ -103,7 +103,7 @@ def _external_report(load_report: Dict[str, Any], results: Dict[str, Any],
         "",
     ])
     path = out_dir / "EXTERNAL_VALIDATION.md"
-    path.write_text("\n".join(lines), encoding="utf-8")
+    path.write_text("\n".join(line.rstrip() for line in lines), encoding="utf-8")
     return path
 
 
