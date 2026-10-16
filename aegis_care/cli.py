@@ -359,6 +359,9 @@ def cmd_external_validate(args) -> int:
         [Path(path) for path in args.fhir],
         out_dir=Path(args.out),
         max_patients=args.limit_patients,
+        base_tasks=args.base_tasks,
+        tasks_per_family=args.tasks_per_family,
+        task_seeds=tuple(args.task_seeds),
         model_spec=args.model,
         progress=lambda message: print(f"{DIM}{message}{RESET}"),
     )
@@ -453,6 +456,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--fhir", nargs="+", required=True,
                    help="FHIR JSON file, directory, or zip (for example a Synthea sample zip)")
     p.add_argument("--limit-patients", type=int, default=10)
+    p.add_argument("--base-tasks", type=int, default=9)
+    p.add_argument("--tasks-per-family", type=int, default=1)
+    p.add_argument("--task-seeds", type=int, nargs="+", default=[0])
     p.add_argument("--out", default=str(RESULTS_DIR / "external_validation"))
     p.set_defaults(func=cmd_external_validate)
 

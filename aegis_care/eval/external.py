@@ -112,6 +112,9 @@ def run_external_validation(
     *,
     out_dir: Path,
     max_patients: int = 10,
+    base_tasks: int = 9,
+    tasks_per_family: int = 1,
+    task_seeds: Sequence[int] = (0,),
     model_spec: Optional[str] = None,
     progress: Optional[Callable[[str], None]] = None,
 ) -> Dict[str, Any]:
@@ -121,7 +124,7 @@ def run_external_validation(
     config = replace(
         CONFIG,
         n_patients=report.patients_loaded,
-        n_base_tasks=9,
+        n_base_tasks=base_tasks,
     )
 
     def environment_factory() -> AegisEnvironment:
@@ -142,9 +145,9 @@ def run_external_validation(
         families=FAMILIES,
         depths=(4,),
         provenance_conditions=("complete", "random40", "targeted"),
-        tasks_per_family=1,
+        tasks_per_family=tasks_per_family,
         n_controls=1,
-        seeds=(0,),
+        seeds=task_seeds,
     )
     results["external_validation"] = source_info
 
@@ -158,6 +161,7 @@ def run_external_validation(
     except Exception as exc:  # reported, never silently promoted to a pass
         results["privacy_error"] = str(exc)
 
+    output_argument = str(out_dir)
     out_dir = Path(out_dir).resolve()
     ExperimentRunner.save(results, out_dir)
     build_report(results, privacy=privacy, out_dir=out_dir)
@@ -176,7 +180,9 @@ def run_external_validation(
         evidence_files=evidence_files,
         command=(
             "python -m aegis_care.cli external-validate --fhir <path> "
-            f"--limit-patients {max_patients} --out {out_dir}"
+            f"--limit-patients {max_patients} --base-tasks {base_tasks} "
+            f"--tasks-per-family {tasks_per_family} "
+            f"--task-seeds {' '.join(map(str, task_seeds))} --out {output_argument}"
         ),
         limitations=LIMITATIONS,
         verification={
@@ -195,7 +201,9 @@ def run_external_validation(
         evidence_files=evidence_files,
         command=(
             "python -m aegis_care.cli external-validate --fhir <path> "
-            f"--limit-patients {max_patients} --out {out_dir}"
+            f"--limit-patients {max_patients} --base-tasks {base_tasks} "
+            f"--tasks-per-family {tasks_per_family} "
+            f"--task-seeds {' '.join(map(str, task_seeds))} --out {output_argument}"
         ),
         limitations=LIMITATIONS,
         verification={

@@ -71,6 +71,14 @@ python scripts/check_reproducible.py               # committed results must re-r
 python scripts/reseal_evidence.py results/external_validation --dry-run
 ```
 
+The supplementary `results/external_validation_expanded/` run uses the public
+Synthea November 2021 FHIR R4 ZIP (SHA-256
+`6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`):
+`external-validate --limit-patients 30 --base-tasks 24 --tasks-per-family 3
+--task-seeds 0 1`. It records 72 generated incidents and 648 paired condition
+runs on five supported resource types. The input ZIP is not bundled with this
+repository; see the evidence manifest for its public source and limitations.
+
 `pytest` writes its evidence artifacts to a temporary directory, never to `results/`, so a
 test run cannot overwrite the committed evidence package. Set `AEGIS_RESULTS_DIR` to
 redirect that output anywhere else.
