@@ -77,14 +77,18 @@ redirect that output anywhere else.
 
 No GPU, no Docker, no network, and no model download are required: the default clinical
 model is a frozen deterministic composer, which also makes every counterfactual replay
-byte-reproducible. To run against a real open-weight model instead:
+byte-reproducible. Scientific metric columns are reproducible; signing keys are now
+random per environment, so signatures are not byte-identical across runs. To run
+against a real open-weight model instead:
 
 ```bash
 python -m aegis_care.cli demo --model "openai:qwen3:8b@http://localhost:11434/v1"
 ```
 
-Structured facts are always computed from FHIR, so swapping the model changes the prose but
-can never change a safety predicate.
+The model adapter raises an error if its endpoint fails; it no longer silently falls
+back to deterministic text. Structured facts are computed from FHIR, but a served
+model can still emit misleading prose. The deterministic results do not establish
+safe attribution or output quality for a stochastic composer.
 
 ### Interactive incident theater
 

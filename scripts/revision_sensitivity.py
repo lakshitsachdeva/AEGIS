@@ -1,17 +1,27 @@
 """Post-review exploratory sensitivity sweep; never overwrites committed results."""
 from __future__ import annotations
 
+import argparse
 import csv
 import json
+import sys
 from dataclasses import replace
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from aegis_care.config import CONFIG
 from aegis_care.eval.runner import ExperimentRunner
 
 
 def main() -> None:
-    output = Path("results/revision_sensitivity")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", default="results/revision_sensitivity")
+    parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1],
+                        help="task-selection seeds; these do not control model sampling")
+    parser.add_argument("--provenance", nargs="+", default=["random40", "targeted"])
+    args = parser.parse_args()
+    output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     c, i, r = CONFIG.candidate, CONFIG.influence, CONFIG.repair
     variants = {
@@ -26,20 +36,23 @@ def main() -> None:
         "attribution_threshold_high": replace(CONFIG, influence=replace(i, tau_i=0.45)),
         "repair_cutoff_high": replace(CONFIG, repair=replace(r, tau_r=0.90)),
     }
+    planned_cells = len(ExperimentRunner.plan(
+        depths=(3, 4), provenance_conditions=tuple(args.provenance),
+        tasks_per_family=1, seeds=tuple(args.seeds)))
     summary = []
     for name, config in variants.items():
         result = ExperimentRunner(config).run(
             depths=(3, 4),
-            provenance_conditions=("random40", "targeted"),
+            provenance_conditions=tuple(args.provenance),
             conditions=("I",),
             tasks_per_family=1,
-            seeds=(0, 1),
+            seeds=tuple(args.seeds),
         )
         rows = result["rows"]
         aggregate = result["by_condition"][0] if result["by_condition"] else {}
         summary.append({
             "variant": name,
-            "planned_cells": 32,
+            "planned_cells": planned_cells,
             "completed_incidents": len(result["incidents"]),
             "condition_rows": len(rows),
             "verification_failures": len(result["verification_failures"]),
